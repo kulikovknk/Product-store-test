@@ -28,3 +28,5 @@
 ## Инструкция
 
 Запустить тесты в папке test
+
+Отчет Allure в папке target/allure-results
