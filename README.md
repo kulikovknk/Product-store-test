@@ -4,6 +4,7 @@
 * Java 8
 * JUnit 4
 * Selenium
+* Selenide
 * Allure
 
 ## Описание
