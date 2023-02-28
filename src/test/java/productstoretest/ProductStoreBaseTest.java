@@ -1,59 +1,57 @@
 package productstoretest;
 
-import config.WebDriverFactory;
 import dto.CustomerRequest;
 import generator.CustomerRequestGenerator;
+import io.qameta.allure.Step;
 import org.junit.*;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.html5.WebStorage;
+import productstore.ProductStoreCartPage;
 import productstore.ProductStoreLoginPage;
 import productstore.ProductStoreMainPage;
+import productstore.ProductStoreSignUpPage;
+
+import static com.codeborne.selenide.Selenide.open;
+import static config.Config.PRODUCT_STORE_CART_PAGE;
+import static config.Config.PRODUCT_STORE_MAIN_PAGE;
 
 public class ProductStoreBaseTest {
 
-    protected static WebDriver driver;
-
-    ProductStoreLoginPage objProductStoreLoginPage;
-
-    @BeforeClass
-    public static void startUp() {
-        driver = WebDriverFactory.getWebDriver();
-    }
-
     @After
+    // при завершении теста выполним выход из учетной записи
     public void clearData(){
-
         logOutCustomer();
-
-        driver.manage().deleteAllCookies();
-        ((WebStorage) driver).getSessionStorage().clear();
-        ((WebStorage) driver).getLocalStorage().clear();
     }
 
-    @AfterClass
-    public static void tearDown(){
-        driver.quit();
-    }
-
+    @Step("Войти под существующей учетной записью")
     public void logInCustomer() {
-
-        CustomerRequest customerRequest = new CustomerRequestGenerator().getCustomerRequest();
-
-        objProductStoreLoginPage = new ProductStoreLoginPage(driver);
-
-        objProductStoreLoginPage.openPage();
-        objProductStoreLoginPage.clickLoginButton();
-        objProductStoreLoginPage.inputCustomerCredentials(customerRequest);
-        objProductStoreLoginPage.clickLoginButtonOnLoginForm();
-
-        Assert.assertTrue(objProductStoreLoginPage.nameOfUserIsVisible());
+        getPageObjectLoginPage()
+                .loginCustomer(new CustomerRequestGenerator().getCustomerRequest(false));
     }
 
+    @Step("Войти под существующей учетной записью")
+    public void logInCustomer(CustomerRequest customerRequest) {
+        getPageObjectLoginPage()
+                .loginCustomer(customerRequest);
+    }
+
+    @Step("Выйти из учетной записи")
     public void logOutCustomer() {
-
-        ProductStoreMainPage objProductStoreMainPage = new ProductStoreMainPage(driver);
-
-        objProductStoreMainPage.openPage();
-        objProductStoreMainPage.clickLogoutButton();
+        getPageObjectMainPage().logoutCustomer();
     }
+
+    public ProductStoreMainPage getPageObjectMainPage() {
+        return open(PRODUCT_STORE_MAIN_PAGE, ProductStoreMainPage.class);
+    }
+
+    public ProductStoreSignUpPage getPageObjectSignUpPage() {
+        return open(PRODUCT_STORE_MAIN_PAGE, ProductStoreSignUpPage.class);
+    }
+
+    public ProductStoreLoginPage getPageObjectLoginPage() {
+        return open(PRODUCT_STORE_MAIN_PAGE, ProductStoreLoginPage.class);
+    }
+
+    public ProductStoreCartPage getPageObjectCartPage() {
+        return open(PRODUCT_STORE_CART_PAGE, ProductStoreCartPage.class);
+    }
+
 }

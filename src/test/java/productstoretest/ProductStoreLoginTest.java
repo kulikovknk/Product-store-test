@@ -1,25 +1,14 @@
 package productstoretest;
 
-import dto.CustomerRequest;
-import generator.CustomerRequestGenerator;
-import org.junit.Assert;
+import io.qameta.allure.junit4.DisplayName;
 import org.junit.Test;
-import productstore.ProductStoreLoginPage;
 
 public class ProductStoreLoginTest extends ProductStoreBaseTest {
 
     @Test
-    public void CheckCustomerLoginPositiveTest() {
-
-        CustomerRequest customerRequest = new CustomerRequestGenerator().getCustomerRequest();
-
-        ProductStoreLoginPage objProductStoreLoginPage = new ProductStoreLoginPage(driver);
-
-        objProductStoreLoginPage.openPage();
-        objProductStoreLoginPage.clickLoginButton();
-        objProductStoreLoginPage.inputCustomerCredentials(customerRequest);
-        objProductStoreLoginPage.clickLoginButtonOnLoginForm();
-
-        Assert.assertTrue(objProductStoreLoginPage.nameOfUserIsVisible());
+    @DisplayName("Вход по кнопке Log in под существующей учетной записью")
+    // проверить вход по кнопке "Log in" на главной странице под существующей учетной записью
+    public void checkCustomerLoginPositiveTest() {
+        logInCustomer();
     }
 }

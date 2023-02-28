@@ -2,35 +2,22 @@ package productstore;
 
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
+import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.switchTo;
 
-public class ProductStoreProductPage extends ProductStoreBasePage {
 
-    private final By addToCart = By.xpath(".//*[text()='Add to cart']");
+public class ProductStoreProductPage {
 
-    public ProductStoreProductPage(WebDriver driver) {
-        super(driver);
-    }
-
+    private final By buttonAddToCart = By.xpath(".//*[text()='Add to cart']");
 
     public void clickOrderButton() {
-
-        new WebDriverWait(driver, Duration.ofSeconds(5))
-                .until(ExpectedConditions.visibilityOfElementLocated(addToCart));
-
-        driver.findElement(addToCart).click();
+        $(buttonAddToCart).click();
     }
 
-    public String acceptAlert() {
+    public String getAlertTextAndAccept() {
 
-        new WebDriverWait(driver, Duration.ofSeconds(3))
-                .until(ExpectedConditions.alertIsPresent());
-
-        Alert alert = driver.switchTo().alert();
+        Alert alert = switchTo().alert();
 
         String alertText = alert.getText();
 

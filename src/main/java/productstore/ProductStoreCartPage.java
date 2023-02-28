@@ -1,55 +1,46 @@
 package productstore;
 
+
+import com.codeborne.selenide.SelenideElement;
 import net.datafaker.Faker;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.FindBy;
 
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-public class ProductStoreCartPage extends ProductStoreBasePage {
+import static com.codeborne.selenide.CollectionCondition.*;
+import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Selenide.*;
 
-    // локаторы окна списка товаров
-    private final By productCard = By.className("success");
-    private final By buttonPlaceOrder = By.xpath(".//button[text() = 'Place Order']");
+public class ProductStoreCartPage {
+
+    private By productCard = By.className("success");
+    @FindBy(xpath = ".//button[text() = 'Place Order']")
+    private SelenideElement buttonPlaceOrder;
 
     // локаторы окна "Place order"
-//    private final By modalOrder = By.className("modal-content");
-    //private final By modalOrder = By.xpath(".//div[@class = 'modal-content']");
-    private final By modalOrder = By.xpath(".//*[@id='orderModalLabel' and text() = 'Place order']");
+    @FindBy(xpath = ".//*[@id='orderModalLabel' and text() = 'Place order']")
+    private SelenideElement modalOrder;
     private final By modalOrderName = By.className("modal-content").id("name");
     private final By modalOrderCountry = By.className("modal-content").id("country");
     private final By modalOrderCity = By.className("modal-content").id("city");
     private final By modalOrderCreditCard = By.className("modal-content").id("card");
     private final By modalOrderMonth = By.className("modal-content").id("month");
     private final By modalOrderYear = By.className("modal-content").id("year");
-    private final By modalOrderButtonPurchase = By.className("modal-content").xpath(".//button[text() = 'Purchase']");
+    private final By modalOrderButtonPurchase = By.className("modal-content")
+            .xpath(".//button[text() = 'Purchase']");
 
     // локаторы окна подтверждения заказа
-    private final By alertTitle = By.cssSelector("sweet-alert").xpath(".//*[text() = 'Thank you for your purchase!']");
-    private final By alertButtonOk = By.cssSelector("sweet-alert").xpath(".//button[contains(@class, 'confirm') and text() = 'OK']");
-
-
-
-
-    public ProductStoreCartPage(WebDriver driver) {
-        super(driver);
-    }
-
-    public void openPage() {
-        driver.get(PRODUCT_STORE_CART_PAGE);
-
-        new WebDriverWait(driver, Duration.ofSeconds(3))
-                .until(ExpectedConditions.numberOfElementsToBeMoreThan(productCard, 0));
-    }
+    private final By alertTitle = By.className("sweet-alert")
+            .xpath(".//*[text() = 'Thank you for your purchase!']");
+    private final By alertButtonOk = By.className("sweet-alert")
+            .xpath(".//button[contains(@class, 'confirm') and text() = 'OK']");
 
     public boolean deleteProductFromCart(String productTitle) {
 
         // первоначальное количество строчек продуктов в корзине
-        int initialNumberOfProducts = driver.findElements(productCard).size();
+        int initialNumberOfProducts = $$(productCard).shouldHave(sizeGreaterThan(0)).size();
 
         // найдем поле с заголовком товара, от него получим всю секцию строки товара как его предка
         // и на этой секции найдем кнопку Delete
@@ -57,23 +48,18 @@ public class ProductStoreCartPage extends ProductStoreBasePage {
                 "//td[text()='%s']/ancestor::tr[@class='success']" +
                 "//*[text()='Delete']", productTitle);
 
-        driver.findElement(By.xpath(buttonDeleteXpath)).click();
-
-        new WebDriverWait(driver, Duration.ofSeconds(3))
-                .until(ExpectedConditions.numberOfElementsToBeLessThan(productCard, initialNumberOfProducts));
+        $(By.xpath(buttonDeleteXpath)).shouldBe(enabled).click();
 
         // текущее количество строчек продуктов в корзине
-        int currentNumberOfProducts = driver.findElements(productCard).size();
+        int currentNumberOfProducts = $$(productCard)
+                .shouldHave(sizeLessThan(initialNumberOfProducts)).size();
 
         // товар удален из корзины если текущее количество строчек товаров меньше исходного
-        return currentNumberOfProducts == initialNumberOfProducts - 1;
+        return currentNumberOfProducts < initialNumberOfProducts;
     }
 
     public void clickButtonPlaceOrder() {
-        driver.findElement(buttonPlaceOrder).click();
-
-        new WebDriverWait(driver, Duration.ofSeconds(3))
-                .until(ExpectedConditions.visibilityOfElementLocated(modalOrder));
+        buttonPlaceOrder.shouldBe(enabled).click();
     }
 
     public void inputRandomOrderDetails() {
@@ -83,24 +69,23 @@ public class ProductStoreCartPage extends ProductStoreBasePage {
         SimpleDateFormat month = new SimpleDateFormat("MMMM");
         SimpleDateFormat year = new SimpleDateFormat("yyyy");
 
-        driver.findElement(modalOrderName).sendKeys(faker.name().username());
-        driver.findElement(modalOrderCountry).sendKeys(faker.address().country());
-        driver.findElement(modalOrderCity).sendKeys(faker.address().cityName());
-        driver.findElement(modalOrderCreditCard).sendKeys(faker.business().creditCardNumber());
-        driver.findElement(modalOrderMonth).sendKeys(month.format(faker.date().future(1, TimeUnit.DAYS)));
-        driver.findElement(modalOrderYear).sendKeys(year.format(faker.date().future(1, TimeUnit.DAYS)));
+        $(modalOrderName).setValue(faker.name().username());
+        $(modalOrderCountry).setValue(faker.address().country());
+        $(modalOrderCity).setValue(faker.address().cityName());
+        $(modalOrderCreditCard).setValue(faker.business().creditCardNumber());
+        $(modalOrderMonth).setValue(month.format(faker.date().future(1, TimeUnit.DAYS)));
+        $(modalOrderYear).setValue(year.format(faker.date().future(1, TimeUnit.DAYS)));
     }
 
-    public boolean clickButtonPurchase() {
-        driver.findElement(modalOrderButtonPurchase).click();
-
-        new WebDriverWait(driver, Duration.ofSeconds(3))
-                .until(ExpectedConditions.visibilityOfElementLocated(alertTitle));
-
-        return driver.findElement(alertTitle).isDisplayed();
+    public void clickButtonPurchase() {
+        $(modalOrderButtonPurchase).shouldBe(enabled).click();
     }
 
     public void closePurchaseConfirmationAlert() {
-        driver.findElement(alertButtonOk).click();
+        $(alertButtonOk).shouldBe(enabled).click();
+    }
+
+    public boolean checkAlertTitleIsDisplayed() {
+        return $(alertTitle).shouldBe(enabled).isDisplayed();
     }
 }

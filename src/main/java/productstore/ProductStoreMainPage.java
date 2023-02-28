@@ -1,84 +1,85 @@
 package productstore;
 
+import com.codeborne.selenide.*;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.FindBy;
 
-import java.time.Duration;
-import java.util.List;
 import java.util.Random;
 
-public class ProductStoreMainPage extends ProductStoreBasePage {
+import static com.codeborne.selenide.CollectionCondition.size;
+import static com.codeborne.selenide.CollectionCondition.sizeGreaterThan;
+import static com.codeborne.selenide.Condition.enabled;
+import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Selenide.$$;
+import static config.Config.PRODUCT_STORE_CART_PAGE;
 
-    private final By buttonSignup = By.id("signin2");
-    private final By buttonLogin = By.id("login2");
-    private final By titleNameOfUser = By.id("nameofuser");
-    private final By buttonLogout = By.id("logout2");
-    private final By buttonLogo = By.id("nava");
-    private final By buttonCart = By.id("cartur");
-    private final By itemCard = By.className("hrefch");
+public class ProductStoreMainPage {
 
-    public ProductStoreMainPage(WebDriver driver) {
-        super(driver);
-    }
-
-    public void openPage() {
-        driver.get(PRODUCT_STORE_MAIN_PAGE);
-
-        new WebDriverWait(driver, Duration.ofSeconds(3))
-                .until(ExpectedConditions.numberOfElementsToBeMoreThan(itemCard, 0));
-    }
+    // локаторы главной страницы
+    @FindBy(id = "signin2")
+    private SelenideElement buttonSignup;
+    @FindBy(id = "login2")
+    private SelenideElement buttonLogin;
+    @FindBy(id = "nameofuser")
+    private SelenideElement titleNameOfUser;
+    @FindBy(id = "logout2")
+    private SelenideElement buttonLogout;
+    @FindBy(id = "nava")
+    private SelenideElement buttonLogo;
+    @FindBy(id = "cartur")
+    private SelenideElement buttonCart;
+    private final By productCard = By.className("hrefch");
 
     public void clickSignUpButton() {
-        driver.findElement(buttonSignup).click();
+        buttonSignup.shouldBe(enabled).click();
     }
 
     public void clickLoginButton() {
-        driver.findElement(buttonLogin).click();
+        buttonLogin.shouldBe(enabled).click();
     }
 
     public void clickLogoutButton() {
-        driver.findElement(buttonLogout).click();
+        buttonLogout.shouldBe(enabled).click();
     }
 
-    public void clickLogoButton() {
-        driver.findElement(buttonLogo).click();
-
-        new WebDriverWait(driver, Duration.ofSeconds(3))
-                .until(ExpectedConditions.numberOfElementsToBeMoreThan(itemCard, 0));
+    public void checkIfNameOfUserIsVisible() {
+        titleNameOfUser.shouldBe(visible);
     }
 
-
-    public boolean nameOfUserIsVisible() {
-
-        new WebDriverWait(driver, Duration.ofSeconds(3))
-                .until(ExpectedConditions.visibilityOfElementLocated(titleNameOfUser));
-
-        return driver.findElement(titleNameOfUser).isDisplayed();
-    }
     public String openRandomProductCard() {
 
         String productTitle = null;
         Random random = new Random();
 
         // получим список всех карточек продуктов на странице
-        List<WebElement> itemsList = driver.findElements(itemCard);
+        ElementsCollection productsCollection = $$(productCard).shouldHave(sizeGreaterThan(0));
 
-        if (itemsList.size() > 0) {
+        if (productsCollection.size() > 0) {
             // найдем произвольную карточку товара и откроем ее страницу
-            WebElement product = itemsList.get(random.nextInt(itemsList.size()));
+            SelenideElement product = productsCollection.get(random.nextInt(productsCollection.size()));
             productTitle = product.getText();
             product.click();
         }
+
         return productTitle;
     }
 
     public void clickButtonCart() {
-        driver.findElement(buttonCart).click();
+        buttonCart.shouldBe(enabled).click();
 
-        new WebDriverWait(driver, Duration.ofSeconds(3))
-                .until(ExpectedConditions.urlContains("cart"));
+        // дождемся пока не исчезнет список продуктов, что будет означать переход на другую страницу
+        $$(productCard).shouldHave(size(0));
+    }
+
+    public String getCurrentUrl() {
+        return WebDriverRunner.url();
+    }
+
+    public void logoutCustomer() {
+        clickLogoutButton();
+    }
+
+    public boolean checkIfCartPageIsOpen() {
+        return getCurrentUrl().contains(PRODUCT_STORE_CART_PAGE);
     }
 }

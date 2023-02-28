@@ -14,20 +14,13 @@ public class CustomerRequestGenerator {
 
             customerRequest.setUsername(faker.name().username());
             customerRequest.setPassword(faker.internet().password());
+        } else {
+            // хардкод при создании тестовых данных - плохая практика
+            // в данном случае нет информации как можно удалить учетную запись из базы
+            // поэтому использую готовые данные, чтобы не засорять тестовый сайт сгенерированными учетками
+            customerRequest.setUsername("rikki.nienow");
+            customerRequest.setPassword("29p2adfl380");
         }
-
-        return customerRequest;
-    }
-
-    public CustomerRequest getCustomerRequest() {
-
-        CustomerRequest customerRequest = new CustomerRequest();
-
-        // хардкод при создании учетных данных - плохая практика
-        // в данном случае применяю ее, чтобы не засорять тестовый сайт сгенерированными учетками
-        // так как нет информации как можно удалить учетную запись из базы
-        customerRequest.setUsername("rikki.nienow");
-        customerRequest.setPassword("29p2adfl380");
 
         return customerRequest;
     }

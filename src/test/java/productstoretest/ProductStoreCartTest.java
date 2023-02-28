@@ -1,5 +1,7 @@
 package productstoretest;
 
+import io.qameta.allure.Step;
+import io.qameta.allure.junit4.DisplayName;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,53 +12,56 @@ import productstore.ProductStoreMainPage;
 public class ProductStoreCartTest extends ProductStoreBaseTest {
 
     @Before
+    // для работы с корзиной выполним вход под существующей учетной записью
     public void setUp() throws Exception {
         logInCustomer();
     }
 
+    @Step("Выбрать в случайном порядке и открыть карточку произвольного продукта")
     private String openRandomProductCard() {
 
-        ProductStoreMainPage objProductStoreMainPage = new ProductStoreMainPage(driver);
+        ProductStoreMainPage mainPage = getPageObjectMainPage();
 
-        objProductStoreMainPage.openPage();
-        String productTitle = objProductStoreMainPage.openRandomProductCard();
+        String productTitle = mainPage.openRandomProductCard();
 
         return productTitle;
     }
 
+    @Step("Добавить карточку продукта в корзину путем нажатия на кнопку \"Add to cart\"")
     private String addProductToCart() {
 
-        ProductStoreProductPage objProductStoreProductPage = new ProductStoreProductPage(driver);
+        ProductStoreProductPage productPage = new ProductStoreProductPage();
 
-        objProductStoreProductPage.clickOrderButton();
-        String alertText = objProductStoreProductPage.acceptAlert();
+        productPage.clickOrderButton();
+        String alertText = productPage.getAlertTextAndAccept();
 
         return alertText;
     }
 
+    @Step("Удалить карточку продукта из корзины путем нажатия на кнопку \"Delete\"")
     private boolean deleteProductFromCart(String productTitle) {
 
-        ProductStoreCartPage objProductStoreCartPage = new ProductStoreCartPage(driver);
+        ProductStoreCartPage cartPage = getPageObjectCartPage();
 
-        objProductStoreCartPage.openPage();
-        boolean isProductDeleted = objProductStoreCartPage.deleteProductFromCart(productTitle);
+        boolean isProductDeleted = cartPage.deleteProductFromCart(productTitle);
 
         return isProductDeleted;
     }
 
     @Test
+    @DisplayName("Переход на страницу корзины по кнопке \"Cart\" с главной страницы")
     // проверить переход на страницу корзины по кнопке "Cart" с главной страницы
     public void checkGoToCartSectionTest() {
 
-        ProductStoreMainPage objProductStoreMainPage = new ProductStoreMainPage(driver);
+        ProductStoreMainPage mainPage = getPageObjectMainPage();
 
-        objProductStoreMainPage.openPage();
-        objProductStoreMainPage.clickButtonCart();
+        mainPage.clickButtonCart();
 
-        Assert.assertTrue("Переход на страницу Cart не выполнен", driver.getCurrentUrl().contains("cart"));
+        Assert.assertTrue("Переход на страницу Cart не выполнен", mainPage.checkIfCartPageIsOpen());
     }
 
     @Test
+    @DisplayName("Добавление товара в корзину по кнопке \"Add to cart\"")
     //  проверить добавление товара в корзину по кнопке "Add to cart"
     public void addProductToCartTest() {
 
@@ -68,6 +73,7 @@ public class ProductStoreCartTest extends ProductStoreBaseTest {
     }
 
     @Test
+    @DisplayName("Удаление товара из корзины по кнопке \"Delete\"")
     //  проверить удаление товара из корзины по кнопке "Delete"
     public void deleteProductFromCartTest() {
 
@@ -83,6 +89,7 @@ public class ProductStoreCartTest extends ProductStoreBaseTest {
     }
 
     @Test
+    @DisplayName("Заказ товара по кнопке \"Place Order\"")
     // проверить заказ товара по кнопке "Place Order"
     public void placeOrderTest() {
 
@@ -92,15 +99,14 @@ public class ProductStoreCartTest extends ProductStoreBaseTest {
 
         Assert.assertEquals("Product added.", alertText);
 
-        ProductStoreCartPage objProductStoreCartPage = new ProductStoreCartPage(driver);
+        ProductStoreCartPage cartPage = getPageObjectCartPage();
 
-        objProductStoreCartPage.openPage();
-        objProductStoreCartPage.clickButtonPlaceOrder();
-        objProductStoreCartPage.inputRandomOrderDetails();
-        boolean isPurchaseConfirmed = objProductStoreCartPage.clickButtonPurchase();
+        cartPage.clickButtonPlaceOrder();
+        cartPage.inputRandomOrderDetails();
+        cartPage.clickButtonPurchase();
 
-        Assert.assertTrue("Заказ не оформлен", isPurchaseConfirmed);
+        Assert.assertTrue("Заказ не оформлен", cartPage.checkAlertTitleIsDisplayed());
 
-        objProductStoreCartPage.closePurchaseConfirmationAlert();
+        cartPage.closePurchaseConfirmationAlert();
     }
 }

@@ -1,26 +1,44 @@
 package productstore;
 
+import com.codeborne.selenide.SelenideElement;
 import dto.CustomerRequest;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.How;
+
+import static com.codeborne.selenide.Condition.enabled;
 
 public class ProductStoreLoginPage extends ProductStoreMainPage {
 
-    private final By fieldUserName = By.id("loginusername");
-    private final By fieldPassword = By.id("loginpassword");
-    private final By buttonLogin = By.xpath(".//button[text()='Log in']");
+    @FindBy(how = How.ID,using = "loginusername")
+    private SelenideElement fieldUserName;
+    @FindBy(how = How.ID, using = "loginpassword")
+    private  SelenideElement fieldPassword;
+    @FindBy(how = How.XPATH, using = ".//button[text()='Log in']")
+    private SelenideElement buttonLogin;
 
-    public ProductStoreLoginPage(WebDriver driver) {
-        super(driver);
+    private void setUserName(String username) {
+        fieldUserName.shouldBe(enabled).setValue(username);
+    }
+
+    private void setPassword(String password) {
+        fieldPassword.shouldBe(enabled).setValue(password);
     }
 
     public void inputCustomerCredentials(CustomerRequest customerRequest) {
-        driver.findElement(fieldUserName).sendKeys(customerRequest.getUsername());
-        driver.findElement(fieldPassword).sendKeys(customerRequest.getPassword());
+        setUserName(customerRequest.getUsername());
+        setPassword(customerRequest.getPassword());
     }
 
     public void clickLoginButtonOnLoginForm() {
-        driver.findElement(buttonLogin).click();
+        buttonLogin.click();
+    }
+
+    public void loginCustomer(CustomerRequest customerRequest) {
+
+        clickLoginButton();
+        inputCustomerCredentials(customerRequest);
+        clickLoginButtonOnLoginForm();
+        checkIfNameOfUserIsVisible();
     }
 
 }
